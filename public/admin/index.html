@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IELTS Admin</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div id="login" class="login hidden">
+  <form id="login-form" class="card">
+    <h1>IELTS Admin</h1>
+    <label>Email <input id="email" type="email" autocomplete="username" required></label>
+    <label>Parol <input id="password" type="password" autocomplete="current-password" required></label>
+    <button type="submit">Kirish</button>
+    <p id="login-error" class="error"></p>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+
+  <header>
+    <strong>IELTS Admin</strong>
+    <nav id="tabs">
+      <button data-tab="dashboard" class="active">Statistika</button>
+      <button data-tab="users">Foydalanuvchilar</button>
+      <button data-tab="attempts">Natijalar</button>
+      <button data-tab="tests">Testlar</button>
+      <button data-tab="live">Jonli faollik <span id="live-count" class="badge hidden"></span></button>
+    </nav>
+    <span class="spacer"></span>
+    <button id="logout" class="ghost">Chiqish</button>
+  </header>
+
+  <main>
+    <section id="tab-dashboard">
+      <div id="kpis" class="kpis"></div>
+      <div class="grid2">
+        <div class="card"><h2>Oxirgi 30 kun <span class="legend" id="chart-legend"></span></h2><div id="chart"></div></div>
+        <div class="card"><h2>Bo'limlar bo'yicha</h2><div id="sections"></div><h2 class="mt">Band taqsimoti</h2><div id="bands"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>Hozir onlayn <small id="online-note"></small></h2><div id="online"></div></div>
+        <div class="card"><h2>So'nggi kirishlar</h2><div id="logins"></div></div>
+      </div>
+      <div class="card"><h2>Testlar bo'yicha</h2><div id="test-stats"></div></div>
+    </section>
+
+    <section id="tab-users" class="hidden">
+      <div class="toolbar">
+        <input id="user-q" type="search" placeholder="Ism, email yoki telefon bo'yicha qidirish">
+        <button id="export-users" class="ghost">CSV yuklab olish</button>
+      </div>
+      <div class="card"><div id="users"></div><div id="users-pager" class="pager"></div></div>
+    </section>
+
+    <section id="tab-attempts" class="hidden">
+      <div class="toolbar">
+        <select id="attempt-status">
+          <option value="">Barcha holatlar</option>
+          <option value="submitted">Baholash kutilmoqda</option>
+          <option value="graded">Baholangan</option>
+          <option value="in_progress">Jarayonda</option>
+        </select>
+        <select id="attempt-section">
+          <option value="">Barcha bo'limlar</option>
+          <option value="reading">Reading</option>
+          <option value="listening">Listening</option>
+          <option value="writing">Writing</option>
+        </select>
+        <button id="export-attempts" class="ghost">CSV yuklab olish</button>
+      </div>
+      <div class="card"><div id="attempts"></div><div id="attempts-pager" class="pager"></div></div>
+    </section>
+
+    <section id="tab-live" class="hidden">
+      <div class="toolbar">
+        <span class="live-title"><span class="dot pulse"></span><strong>Jonli faollik</strong> <small>har 3 soniyada yangilanadi · ustiga bosing</small></span>
+        <span class="spacer"></span>
+        <span class="live-filters" id="live-filters">
+          <label><input type="checkbox" value="POST" checked> POST</label>
+          <label><input type="checkbox" value="PATCH" checked> PATCH</label>
+          <label><input type="checkbox" value="PUT" checked> PUT</label>
+          <label><input type="checkbox" value="DELETE" checked> DELETE</label>
+        </span>
+        <button id="live-pause" class="ghost">Pauza</button>
+        <button id="live-clear" class="ghost">Tozalash</button>
+      </div>
+      <div class="card"><div id="live-list"></div></div>
+    </section>
+
+    <section id="tab-tests" class="hidden">
+      <div class="card"><div id="tests"></div></div>
+      <p class="hint">Yangi test qo'shish uchun <code>POST /api/admin/tests</code> endpointidan foydalaning (README'ga qarang).</p>
+    </section>
+  </main>
+</div>
+
+<dialog id="dialog"><div id="dialog-body"></div><button id="dialog-close" class="ghost">Yopish</button></dialog>
+<script src="admin.js"></script>
+</body>
+</html>
