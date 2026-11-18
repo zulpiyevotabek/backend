@@ -15,7 +15,7 @@ Node.js + Express + PostgreSQL backend. Bu loyiha frontend emas: API va `/admin`
    - `CORS_ORIGINS` = frontend domeni, masalan `https://saytingiz.netlify.app` (bir nechta domen vergul bilan ajratiladi).
    - `NODE_ENV` = `production`.
    - `STATS_TZ` = `Asia/Tashkent`.
-5. Deploy sozlamalarida Root Directory bo'sh (`/`) qolsin. `railway.json` avtomatik ravishda `npm ci`, `npm start` va `/health` healthcheck'ni belgilaydi.
+5. Deploy sozlamalarida Root Directory bo'sh (`/`) qolsin. Build Command maydoni bo'sh qolsin (Railway avtomatik install qiladi). `railway.json` `npm start` va `/health` healthcheck'ni belgilaydi. Dependency install'ni Railway/Nixpacks avtomatik ravishda `package-lock.json` asosida bajaradi; Build Command maydoniga `npm ci` yozmang.
 6. Deploy tugagach, Railway bergan public domain orqali tekshiring:
    - `/` — API holati.
    - `/health` — PostgreSQL ulanishi; `{"status":"ok",...}` chiqishi kerak.
