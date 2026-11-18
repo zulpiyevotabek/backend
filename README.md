@@ -1,62 +1,53 @@
-# IELTS Mock — Backend (Render + PostgreSQL)
+# IELTS Mock — Backend (Railway + PostgreSQL)
 
-Node.js + Express + PostgreSQL backend. Bu loyiha frontend emas: u API va `/admin` admin panelini taqdim etadi.
+Node.js + Express + PostgreSQL backend. Bu loyiha frontend emas: API va `/admin` admin panelini taqdim etadi.
 
-## Render'ga joylash — tayyor Blueprint
+## Railway'ga joylash
 
-Loyiha ildizida `render.yaml` bor. U Render'da backend servisi va PostgreSQL bazasini yaratib, `DATABASE_URL` ni avtomatik ulaydi.
+1. ZIP ichidagi loyiha fayllarini GitHub repository'ga yuklang. `node_modules` va `.env` yuklamang.
+2. Railway'da **New Project → Deploy from GitHub Repo** orqali repository'ni ulang.
+3. Railway loyihasiga **PostgreSQL** service qo'shing.
+4. Backend service → **Variables** bo'limida quyidagilarni kiriting:
+   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (Postgres service nomi boshqacha bo'lsa, o'sha nomdan foydalaning).
+   - `JWT_SECRET` = uzun, tasodifiy maxfiy qiymat (kamida 32 belgi).
+   - `ADMIN_EMAIL` = admin email.
+   - `ADMIN_PASSWORD` = kuchli admin paroli (kamida 12 belgi tavsiya qilinadi).
+   - `CORS_ORIGINS` = frontend domeni, masalan `https://saytingiz.netlify.app` (bir nechta domen vergul bilan ajratiladi).
+   - `NODE_ENV` = `production`.
+   - `STATS_TZ` = `Asia/Tashkent`.
+5. Deploy sozlamalarida Root Directory bo'sh (`/`) qolsin. `railway.json` avtomatik ravishda `npm ci`, `npm start` va `/health` healthcheck'ni belgilaydi.
+6. Deploy tugagach, Railway bergan public domain orqali tekshiring:
+   - `/` — API holati.
+   - `/health` — PostgreSQL ulanishi; `{"status":"ok",...}` chiqishi kerak.
+   - `/admin` — admin panel.
 
-1. ZIP'ni oching. Ichidagi `ielts-backend` papkasini GitHub'ga alohida repository qilib yuklang. `node_modules` va `.env` yuklamang.
-2. Render.com'ga kiring → **New** → **Blueprint**.
-3. GitHub repository'ni tanlang va `render.yaml` topilganini tekshiring.
-4. **Apply** bosing. Render backend va PostgreSQL resurslarini yaratadi.
-5. Blueprint yaratish vaqtida so'ralgan `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CORS_ORIGINS` qiymatlarini kiriting:
-   - `ADMIN_EMAIL`: admin uchun email.
-   - `ADMIN_PASSWORD`: kamida 12 belgili kuchli parol.
-   - `CORS_ORIGINS`: frontend domeni, masalan `https://sizning-saytingiz.netlify.app`. Bir nechta domen bo'lsa vergul bilan yozing. Frontend hali tayyor bo'lmasa, vaqtincha `*` yozish mumkin, lekin ommaviy ishga tushirishdan oldin aniq domen bilan almashtiring.
-6. Deploy tugagach Render backend uchun `https://...onrender.com` domen beradi.
+**Muhim:** Railway PostgreSQL'ning private `DATABASE_URL` manzilidan foydalaning. Private URL uchun `DATABASE_SSL` kerak emas (default `false`). Agar ataylab public PostgreSQL URL ishlatsangiz, `DATABASE_SSL=true` qo'ying. `JWT_SECRET`, admin paroli va database URL'ni GitHub'ga yoki frontend `.env` fayliga joylamang.
 
-**Narx haqida:** Blueprint `starter` web service va `basic-256mb` PostgreSQL rejasini tanlaydi; ular pullik bo'lishi mumkin. Apply bosishdan oldin Render ko'rsatadigan narxni tekshiring. Bepul web service ishlatmoqchi bo'lsangiz, Dashboard'da web service rejasini mavjud bepul rejaga o'zgartiring. PostgreSQL narxi va amal qilish shartlarini alohida tekshiring.
-
-### Ishlayotganini tekshirish
-
-Brauzerda quyidagilarni oching (domenni o'zingiznikiga almashtiring):
-
-- `https://SIZNING-BACKEND.onrender.com/` — API holati.
-- `https://SIZNING-BACKEND.onrender.com/health` — PostgreSQL bilan ulanish tekshiruvi; `{"status":"ok",...}` chiqishi kerak.
-- `https://SIZNING-BACKEND.onrender.com/admin` — admin panel.
-
-Jadvallar birinchi ishga tushishda avtomatik yaratiladi. Admin akkaunt ham `ADMIN_EMAIL` va `ADMIN_PASSWORD` orqali avtomatik yaratiladi. Admin parolini keyin o'zgartirish uchun `ADMIN_RESET_PASSWORD=true` ni bir marta qo'shib redeploy qiling, keyin uni darhol o'chiring.
-
-## Render Environment sozlamalari
-
-Render → backend service → **Environment** bo'limida:
-- `DATABASE_URL` Blueprint orqali PostgreSQL'dan avtomatik olinadi. Uni qo'lda boshqa URL bilan almashtirmang.
-- `JWT_SECRET` avtomatik yaratiladi; uni o'chirmang yoki oshkor qilmang.
-- `CORS_ORIGINS` ga frontendning to'liq HTTPS domenini yozing (oxirida `/` bo'lmasin).
-- `ADMIN_EMAIL`, `ADMIN_PASSWORD` maxfiy qiymat bo'lib qolishi kerak; ularni GitHub'ga yozmang.
+Jadvallar server birinchi marta ishga tushganda avtomatik yaratiladi. Admin akkaunt `ADMIN_EMAIL` va `ADMIN_PASSWORD` orqali avtomatik yaratiladi. Admin parolini keyin yangilash uchun `ADMIN_RESET_PASSWORD=true` ni bir marta qo'shib redeploy qiling, so'ng darhol o'chiring.
 
 ## Frontendni ulash
 
 1. `docs/frontend-api.js` faylini frontend loyihasiga `src/api.js` deb nusxalang.
-2. Frontend ildizida `.env` yarating: `VITE_API_URL=https://SIZNING-BACKEND.up.railway.app`
+2. Frontend ildizida `.env` yarating: `VITE_API_URL=https://SIZNING-BACKEND.up.railway.app` (Railway bergan haqiqiy domenni yozing).
 3. `src/main.js` ga qo'shing:
    ```js
    import { trackVisit, startHeartbeat } from './api'
    trackVisit(); startHeartbeat();
    ```
-   (Router ishlatilganda har bir sahifa o'zgarishida `router.afterEach((to) => trackVisit(to.fullPath))` ham qo'shing.)
-4. Boshqa funksiyalar: `register`, `login`, `listTests`, `startTest`, `saveAnswers`, `submitTest`, `myAttempts`.
+   Router ishlatilsa, sahifa o'zgarganida `router.afterEach((to) => trackVisit(to.fullPath))` ham qo'shing.
+4. Backend service Variables ichidagi `CORS_ORIGINS` qiymatiga frontendning to'liq HTTPS domenini yozing. O'zgartirgandan keyin redeploy qiling.
+5. Funksiyalar: `register`, `login`, `listTests`, `startTest`, `saveAnswers`, `submitTest`, `myAttempts`.
 
 ## Lokal ishga tushirish
 
 ```bash
-cp .env.example .env     # DATABASE_URL ni o'zingizning Postgres'ingizga moslang
+cp .env.example .env
 npm install
-npm run seed             # ixtiyoriy: 2 ta namuna test
-npm run dev              # http://localhost:3000
-npm run smoke            # (server ishlayotganda) hamma narsani tekshiradi
+npm run seed
+npm run dev
 ```
+
+`/health` endpoint server va PostgreSQL ulanishini tekshiradi. `npm run smoke` integratsion tekshiruvlarni bajaradi (server ishlayotgan bo'lishi va `ADMIN_EMAIL`/`ADMIN_PASSWORD` berilgan bo'lishi kerak).
 
 ---
 
